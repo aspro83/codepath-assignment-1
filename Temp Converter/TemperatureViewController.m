@@ -8,26 +8,18 @@
 
 #import "TemperatureViewController.h"
 
-@interface TemperatureViewController ()
-
-- (void)updateTemperature;
-//what is this?
-//why does the controller have to be a textfield delegate
-//how to I streamline editing a textbox and getting the other one to clear
-//how do I make the button green and rectangular? is it an ios 7/xcode 5 thing?
-//whats with the strong/weak things?
-
-
+@interface TemperatureViewController () <UITextFieldDelegate>
 
 @end
 
 @implementation TemperatureViewController
 
+#pragma mark - View Lifecycle
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        self.title = @"Temperature Converter";
+        self.title = @"Temperature";
     }
     return self;
 }
@@ -35,11 +27,11 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
-    [self.convertButton addTarget:self action:@selector(updateTemperature) forControlEvents:UIControlEventTouchDown];
-    self.celciusAmount.delegate = self;
-    self.fahrenheitAmount.delegate = self;
-    
+
+    self.celciusTextField.delegate = self;
+    self.fahrenheitTextField.delegate = self;
+
+    [self.fahrenheitTextField becomeFirstResponder];
 }
 
 - (void)didReceiveMemoryWarning
@@ -48,33 +40,50 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (IBAction)dismissKeyboard:(id)sender;
+- (IBAction)updateTemperature:(id)sender
 {
-    [sender becomeFirstResponder];
-    [sender resignFirstResponder];
+    NSNumberFormatter *numberFormatter = [[NSNumberFormatter alloc] init];
+    [numberFormatter setRoundingMode: NSNumberFormatterRoundDown];
+    [numberFormatter setNumberStyle:NSNumberFormatterDecimalStyle];
+    [numberFormatter setMaximumFractionDigits:2];
     
-}
-
-
--(void)textFieldDidBeginEditing:(UITextField *)textField {
-    if (textField.tag == 0) {
-        self.celciusAmount.text = @"";
-    } else {
-        self.fahrenheitAmount.text = @"";
-    }
-}
-
-- (void)updateTemperature {
-    if ([self.fahrenheitAmount.text length] != 0) {
-        int temperature = [self.fahrenheitAmount.text intValue];
+    if ([self.fahrenheitTextField.text length] != 0)
+    {
+        float temperature = [self.fahrenheitTextField.text floatValue];
         temperature = (temperature -  32) * 5/9;
-        self.celciusAmount.text = [NSString stringWithFormat:@"%i", temperature];
-    } else if ([self.celciusAmount.text length] != 0) {
-        int temperature = [self.celciusAmount.text intValue];
+        self.celciusTextField.text = [numberFormatter stringFromNumber:[NSNumber numberWithFloat:temperature]];
+    }
+    else if ([self.celciusTextField.text length] != 0)
+    {
+        float temperature = [self.celciusTextField.text floatValue];
         temperature = temperature * 9/5 + 32;
-        self.fahrenheitAmount.text = [NSString stringWithFormat:@"%i", temperature];
+        self.fahrenheitTextField.text = [numberFormatter stringFromNumber:[NSNumber numberWithFloat:temperature]];
     }
 }
 
+#pragma mark - UITextFieldDelegate
+-(BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
+{
+    NSCharacterSet *allowedCharacters = [NSCharacterSet characterSetWithCharactersInString:@".-0123456789"];
+    if([string rangeOfCharacterFromSet:allowedCharacters.invertedSet].location != NSNotFound)
+    {
+        return false;
+    }
+    
+    if(textField == self.fahrenheitTextField)
+    {
+        self.celciusTextField.text = @"";
+    }
+    else
+    {
+        self.fahrenheitTextField.text = @"";
+    }
+    return true;
+}
+
+-(BOOL)textFieldShouldReturn:(UITextField *)textField {
+    [textField resignFirstResponder];
+    return NO;
+}
 
 @end

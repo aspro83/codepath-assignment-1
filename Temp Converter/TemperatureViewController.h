@@ -8,10 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
-@interface TemperatureViewController : UIViewController <UITextFieldDelegate>
+@interface TemperatureViewController : UIViewController
 
-@property (nonatomic, weak) IBOutlet UITextField *fahrenheitAmount;
-@property (nonatomic, weak) IBOutlet UITextField *celciusAmount;
+@property (nonatomic, weak) IBOutlet UITextField *fahrenheitTextField;
+@property (nonatomic, weak) IBOutlet UITextField *celciusTextField;
 @property (nonatomic, strong) IBOutlet UIButton *convertButton;
 
 @end
